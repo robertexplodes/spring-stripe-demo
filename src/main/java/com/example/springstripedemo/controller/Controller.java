@@ -7,6 +7,8 @@ import com.example.springstripedemo.persistence.OrderRepository;
 import com.example.springstripedemo.persistence.ProductRepository;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
 import com.stripe.model.Price;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.ApiResource;
@@ -100,11 +102,26 @@ public class Controller {
     }
 
     @PostMapping("/webhook")
-    public void webhook(@RequestBody Event body) {
-        var objectDeserializer = body.getDataObjectDeserializer();
-        if (!objectDeserializer.getObject().isPresent()) {
+    public void webhook(@RequestBody Event event) {
+        var objectDeserializer = event.getDataObjectDeserializer();
+        if (objectDeserializer.getObject().isEmpty()) {
             throw new IllegalArgumentException("No object found");
         }
 
+        var stripeObject = objectDeserializer.getObject().get();
+
+        switch (event.getType()) {
+            case "payment_intent.succeeded":
+                var paymentIntent = (PaymentIntent) stripeObject;
+                var order = orderRepository.findById(Long.parseLong(paymentIntent.getMetadata().get("orderId"))).orElseThrow();
+                order.setPaid(true);
+                orderRepository.save(order);
+                break;
+            case "payment_method.attached":
+                var paymentMethod = (PaymentMethod) stripeObject;
+                break;
+            default:
+                throw new IllegalArgumentException("Unhandled event type: " + event.getType());
+        }
     }
 }

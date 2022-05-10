@@ -3,6 +3,7 @@ package com.example.springstripedemo.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
@@ -25,6 +26,7 @@ public class Order {
     @ManyToMany(cascade = CascadeType.PERSIST)
     private List<Product> products;
 
+    @Setter
     @Column(name = "paid", nullable = false, columnDefinition = "boolean default false")
     private boolean paid;
 

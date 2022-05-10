@@ -4,6 +4,7 @@ package com.example.springstripedemo.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -20,9 +21,11 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_gen")
     private Long id;
 
-    private String name;
+    @NonNull
+    private String productId;
 
-    private BigDecimal price;
+    @NonNull
+    private String priceId;
 
 
     @Override
